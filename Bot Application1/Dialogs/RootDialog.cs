@@ -12,15 +12,16 @@ using System.Net;
 using System.IO;
 using HtmlAgilityPack;
 using System.Text;
+using System.Timers;
 
 namespace Bot_Application1.Dialogs {
     [Serializable]
     public class RootDialog : IDialog<object> {
 
-
-
+       
+        
         public RootDialog() {
-
+          
         }
 
         public Task StartAsync(IDialogContext context) {
@@ -32,13 +33,18 @@ namespace Bot_Application1.Dialogs {
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result) {
 
             try {
+              //  CountDown.timer.Stop();
                 var activity = await result as Activity;
                 int n;
 
                 if (activity.Text.Contains("123")) {
                     DateTime dayOff = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 18, 0, 0);
                     TimeSpan dd = dayOff.Subtract(DateTime.UtcNow.AddHours(8));
-
+                    CountDown.timer.Interval = 5000;
+                    CountDown.timer.Elapsed += Timer_Elapsed;
+                    CountDown.context = context;
+                  //  CountDown.timer.Start();
+                    await context.PostAsync(CountDown.no.ToString());
                     await context.PostAsync("倒數" + Math.Floor(dd.TotalMinutes) + "分鐘" + dd.Seconds + "秒");
                 } else if (activity.Text.Contains("勞保級距")) {
                     HttpClient client = new HttpClient();
@@ -134,6 +140,8 @@ namespace Bot_Application1.Dialogs {
                     await context.PostAsync("廷廷貓");
                 } else if (activity.Text.Contains("冷清")) {
                     await context.PostAsync("慘");
+                } else if (activity.Text.Contains("UML")){
+                    await context.PostAsync("統一塑模語言（英語：Unified Modeling Language，縮寫UML）是非專利的第三代塑模和規約語言。 UML是一種開放的方法，用於說明、可視化、構建和編寫一個正在開發的、物件導向的、軟體密集系統的製品的開放方法。");
                 } else if (activity.Text.Contains("小雨")) {
                     await context.PostAsync("志峰:人生污點");
                 } else if (activity.Text.Contains("辭") || activity.Text.Contains("慈")) {
@@ -150,15 +158,34 @@ namespace Bot_Application1.Dialogs {
                 } else if (activity.Text.Contains("yo")) {
                     await context.PostAsync("買steam囉");
 
+                } else if (activity.Text.Contains("開盤倒數")) {
+                    DateTime time = new DateTime(2017, 08, 04, 9, 40, 0);
+                    DateTime now = DateTime.UtcNow.AddHours(8);
+                    TimeSpan t = time.Subtract(now);
+                    await context.PostAsync(t.ToString());
+
+                } else if (activity.Text.Contains("峰哥獎金")) {
+                    await context.PostAsync("2017年7月 1萬2");
+
                 } else if (activity.Text.Contains("小雞")) {
-                    await context.PostAsync("資訊部 祥凱#624:我7/13-7/17不在");
+                    await context.PostAsync("資訊部 祥凱#624:安安");
+
+                } else if (activity.Text.Contains("鬍鬚張")) {
+                    await context.PostAsync("志峰:幹你娘鬍鬚張");
+
+                } else if (activity.Text.Contains("峰哥組長")) {
+                    await context.PostAsync("我領導加給只有2000");
 
                 } else if (activity.Text.Contains("董事長兒子")) {
                     await context.PostAsync("riolove chang");
                 } else if (activity.Text.Contains("文B")) {
                     await context.PostAsync("打醬油");
+                } else if (activity.Text.Contains("起床")) {
+                    await context.PostAsync("現在時間么三三洞，部隊起床");
+                } else if (activity.Text.Contains("賭盤")) {
+                    await context.PostAsync("志峰:0~499  1.7 \n 500~1999 1.3 \n 2000~3999 1.5 \n 4000 up 1.9");
                 } else if (activity.Text.Contains("風歌") || activity.Text.Contains("志峰") || activity.Text.Contains("峰")) {
-                    await context.PostAsync("開開");
+                    await context.PostAsync("上頭看得到");
                 } else if (int.TryParse(activity.Text.Remove(0, 10), out n)) {
                     if (activity.Text.Remove(0, 10).Count() == 4) {
                         WebClient client = new WebClient();
@@ -199,14 +226,23 @@ namespace Bot_Application1.Dialogs {
                     // return our reply to the user
                     await context.PostAsync($"You sent {activity.Text} which was {length} characters");
                     int i = new Random().Next(0, 5);
+                    int i2 = new Random().Next(0, 5);
                     List<string> s = new List<string>();
-                    s.Add("你就當練功幫我修這個Bug吧！");
-                    s.Add("你要想未來的分紅幫我修這個Bug吧！");
-                    s.Add("你就當測試幫我做這個案子吧！");
-                    s.Add("你就當學經驗幫我偷這些資料吧！");
-                    s.Add("你要想未來的分紅幫我墊這個小錢吧！");
-                    s.Add("你就當學經驗幫我解這個問題吧！");
-                    await context.PostAsync(s[i]);
+                    s.Add("你就當練功");
+                    s.Add("你要想未來的分紅");
+                    s.Add("你就當測試");
+                    s.Add("你就當學經驗");
+                    s.Add("你要想未來的分紅");
+                    s.Add("你就當學經驗");
+
+                    List<string> s2 = new List<string>();
+                    s2.Add("幫我看程式碼吧！");
+                    s2.Add("幫我做這個案子吧！");
+                    s2.Add("幫我修這個Bug吧！");
+                    s2.Add("幫我偷這些資料吧！");
+                    s2.Add("幫我解這個問題吧！");
+                    s2.Add("幫我墊這個小錢吧！");
+                    await context.PostAsync(s[i] + s2[i2]);
                 }
 
 
@@ -218,6 +254,10 @@ namespace Bot_Application1.Dialogs {
                 await context.PostAsync(ex.Message);
             }
 
+        }
+
+        private async void Timer_Elapsed(object sender, ElapsedEventArgs e) {
+           await  CountDown.context.PostAsync("沒人");
         }
     }
 }
