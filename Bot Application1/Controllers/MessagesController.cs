@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
+using System;
+using Bot_Application1.Dialogs;
 
 namespace Bot_Application1 {
     [BotAuthentication]
@@ -14,6 +16,22 @@ namespace Bot_Application1 {
         /// </summary>
         public async Task<HttpResponseMessage> Post([FromBody]Activity activity) {
             if (activity.Type == ActivityTypes.Message) {
+
+                string userName = "";
+                string id = "";
+                if (activity.From.Name != null)
+                {
+                    userName = activity.From.Name;//Here we are getting user name
+                    id = activity.From.Id;
+                }
+                ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
+                Activity reply = activity.CreateReply(userName);
+                activity.TextFormat = "markdown";
+                Activity reply2 = activity.CreateReply(id);
+              //  await connector.Conversations.ReplyToActivityAsync(reply);
+              //  await connector.Conversations.ReplyToActivityAsync(reply2);
+                Contact.Id = id;
+                Contact.Name = userName;
                 await Conversation.SendAsync(activity, () => new Dialogs.RootDialog());
             } else {
                 HandleSystemMessage(activity);
