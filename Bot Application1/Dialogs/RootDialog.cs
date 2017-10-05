@@ -40,6 +40,7 @@ namespace Bot_Application1.Dialogs
 
             try
             {
+              
                 //  CountDown.timer.Stop();
                 string[] separators = { ",", "!", ";", " " };
 
@@ -53,7 +54,14 @@ namespace Bot_Application1.Dialogs
 
                 var activity = await result as Activity;
                 int n;
-
+                
+                if (Contact.history.Count > 30) {
+                    Contact.history.RemoveAt(0);
+                }
+                if (!activity.Text.Contains("對話紀錄")) {
+                    Contact.history.Add(Contact.Name+" : "+activity.Text.Remove(0,9));
+                }
+              
                 if (activity.Text.Contains("123"))
                 {
                     DateTime dayOff = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 18, 0, 0);
@@ -71,8 +79,68 @@ namespace Bot_Application1.Dialogs
 
 
                     // await context.PostAsync("http://imgur.com/cVNPngl");
+                }else if(activity.Text.Contains("峰哥副理")){
+                    await context.PostAsync("估一下，要完成店長排班你還需要幾個工作天.如果下週一，二加班寫的完嗎？");
                 }
-                else if (activity.Text.Contains("456"))
+                else if(activity.Text.Contains("101")){
+                    /*
+                     *   ┃┃┃
+     ┃┃┃
+  ┃┃┃
+┏━━━━━━┓
+┃┏┓┏┓┏┓┃
+┃┗┛┗┛┗┛┃
+┃┏┓┏┓┏┓┃
+┃┗┛┗┛┗┛┃
+┃┏┓┏┓┏┓┃
+┃┗┛┗┛┗┛┃
+┃┏┓┏┓┏┓┃
+┃┗┛┗┛┗┛┃
+                     */
+                    await context.PostAsync("          ┃┃┃");
+                    await context.PostAsync("          ┃┃┃");
+                    await context.PostAsync("┏━━━━━━┓");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+                    await context.PostAsync("┃┏┓┏┓┏┓┃");
+                    await context.PostAsync("┃┗┛┗┛┗┛┃");
+
+
+
+
+
+
+
+
+                } else if (activity.Text.Contains("456"))
                 {
                     DateTime breakOff = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 12, 0, 0);
                     TimeSpan dd = breakOff.Subtract(DateTime.UtcNow.AddHours(8));
@@ -335,8 +403,14 @@ namespace Bot_Application1.Dialogs
                 {
                     await context.PostAsync("晚點到");
 
-                }
-                else if (activity.Text.ToUpper().Contains("YO"))
+                } else if (activity.Text.Contains("對話紀錄")) {
+
+                    foreach(string s in Contact.history){
+                        await context.PostAsync(s);
+                    }
+                 
+
+                } else if (activity.Text.ToUpper().Contains("YO"))
                 {
                     await context.PostAsync("http://imgur.com/ygivezG");
 
@@ -524,6 +598,7 @@ namespace Bot_Application1.Dialogs
     // public delegate void ControlHandler(bool show);
     public class Contact
     {
+        public static List<string> history = new List<string>();
         public static string Id;
         public static string Name;
         public static Dictionary<string, string> Bet = new Dictionary<string, string>();
