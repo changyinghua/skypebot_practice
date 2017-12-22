@@ -158,6 +158,12 @@ namespace Bot_Application1.Dialogs
                     }
 
 
+                }else if(activity.Text.Contains("遲到")){
+                    string s = "我還是希望我們資訊部同仁應該潔身自愛，管理好自己，我不喜歡管人，如果做不到，那就考慮是否適合留在資訊部，" +
+                    "我不會浪費時間在需要監督的人身上，也不會和無法管理好自己的人共事。以上 請配合 謝謝";
+                    string p = "CLint";
+                    await context.PostAsync(s);
+                    //await context.PostAsync(p);
                 }
                 else if (activity.Text.Contains("離職賭盤"))
                 {
