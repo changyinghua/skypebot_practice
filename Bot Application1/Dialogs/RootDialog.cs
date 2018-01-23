@@ -14,6 +14,7 @@ using HtmlAgilityPack;
 using System.Text;
 using System.Timers;
 using System.Threading;
+using Bot_Application1.Model;
 
 namespace Bot_Application1.Dialogs
 {
@@ -40,7 +41,8 @@ namespace Bot_Application1.Dialogs
 
             try
             {
-              
+                SkypeDAO dao = new SkypeDAO();
+                dao.Open();
                 //  CountDown.timer.Stop();
                 string[] separators = { ",", "!", ";", " " };
 
@@ -54,14 +56,22 @@ namespace Bot_Application1.Dialogs
 
                 var activity = await result as Activity;
                 int n;
-                
-                if (Contact.history.Count > 30) {
-                    Contact.history.RemoveAt(0);
+
+                //if (Contact.history.Count > 30) {
+                //    Contact.history.RemoveAt(0);
+                //}
+                if (activity.Text.Contains("對話紀錄")) {
+                    //Contact.history.Add(Contact.Name + " : " + activity.Text.Remove(0, 9));
+                    List<MessageLog> log = dao.GetMessageLog();
+                    StringBuilder sb = new StringBuilder();
+                    if (log.Count > 0) {
+                        foreach(var item in log) {
+                            sb.Append(item.Name + " " + item.Log + " " + item.Time.ToString("yyyy-MM-dd HH:mmss")+ " \n\n");
+                        }
+                    }
+                    await context.PostAsync(sb.ToString());
                 }
-                if (!activity.Text.Contains("對話紀錄")) {
-                    Contact.history.Add(Contact.Name+" : "+activity.Text.Remove(0,9));
-                }
-              
+                dao.Insert(Contact.Name, activity.Text, DateTime.UtcNow.AddHours(8).ToString("yyyy-MM-dd HH:mm:ss"));
                 if (activity.Text.Contains("123"))
                 {
                     DateTime dayOff = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 18, 0, 0);
@@ -596,6 +606,7 @@ namespace Bot_Application1.Dialogs
             catch (Exception ex)
             {
                 await context.PostAsync("幹你娘,指令別亂打");
+                await context.PostAsync(ex.Message);
             }
 
         }
