@@ -148,6 +148,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Model\MessageLog.cs" />
+    <Compile Include="Model\Quotation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SkypeDAO.cs" />
     <Compile Include="weather.Designer.cs" />

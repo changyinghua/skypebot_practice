@@ -18,7 +18,7 @@ namespace Bot_Application1 {
             }          
         }
 
-        public void Insert(string name,string log,string time) {
+        public void InsertMessageLog(string name,string log,string time) {
             try {
                 string query = $"insert into message_log(name,log,time) values('{name}','{log}','{time}')";
                 NpgsqlCommand cmd;
@@ -44,7 +44,7 @@ namespace Bot_Application1 {
                 cmd.CommandTimeout = 0;
                 NpgsqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read()) {
-                    result.Add(Convert(reader));
+                    result.Add(ConvertMessageLog(reader));
                 }
                 reader.Close();
                 return result;
@@ -53,11 +53,49 @@ namespace Bot_Application1 {
             }
         }
 
-        internal  MessageLog Convert(NpgsqlDataReader reader) {
+        public List<Quotation> GetQuotations(string key) {
+            List<Quotation> result = new List<Quotation>();
+            try {
+                string query = $"select key,value from quotation where key like '%{key}%' order by seq desc";
+                NpgsqlCommand cmd;
+                cmd = connection.CreateCommand();
+                cmd.CommandText = query;
+                cmd.CommandTimeout = 0;
+                NpgsqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read()) {
+                    result.Add(ConvertQuotation(reader));
+                }
+                reader.Close();
+                return result;
+            } catch (Exception ex) {
+                return result;
+            }
+        }
+
+        public void InsertQuotations(string key,string value) {       
+            try {
+                NpgsqlCommand cmd;
+                cmd = connection.CreateCommand();
+                cmd.CommandText = $"insert into quotation(key,value) values('{key}','{value}')";
+                cmd.CommandTimeout = 0;
+                cmd.ExecuteReader();
+            } catch (Exception ex) {
+                throw ex;
+            }
+        }
+
+        internal  MessageLog ConvertMessageLog(NpgsqlDataReader reader) {
             MessageLog value = new MessageLog();
             value.Name = reader.GetString(0);
             value.Log = reader.GetString(1);
             value.Time = reader.IsDBNull(2)? new DateTime() : reader.GetDateTime(2) ;
+            return value;
+        }
+
+        internal Quotation ConvertQuotation(NpgsqlDataReader reader) {
+            Quotation value = new Quotation();
+            value.Key = reader.GetString(0);
+            value.Value = reader.GetString(1);
             return value;
         }
     }

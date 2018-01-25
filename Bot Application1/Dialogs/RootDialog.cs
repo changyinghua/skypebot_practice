@@ -16,31 +16,25 @@ using System.Timers;
 using System.Threading;
 using Bot_Application1.Model;
 
-namespace Bot_Application1.Dialogs
-{
+namespace Bot_Application1.Dialogs {
     [Serializable]
-    public class RootDialog : IDialog<object>
-    {
+    public class RootDialog : IDialog<object> {
 
 
 
-        public RootDialog()
-        {
+        public RootDialog() {
 
         }
 
-        public Task StartAsync(IDialogContext context)
-        {
+        public Task StartAsync(IDialogContext context) {
             context.Wait(MessageReceivedAsync);
 
             return Task.CompletedTask;
         }
 
-        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
-        {
+        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result) {
 
-            try
-            {
+            try {
                 SkypeDAO dao = new SkypeDAO();
                 dao.Open();
                 //  CountDown.timer.Stop();
@@ -65,34 +59,64 @@ namespace Bot_Application1.Dialogs
                     List<MessageLog> log = dao.GetMessageLog();
                     StringBuilder sb = new StringBuilder();
                     if (log.Count > 0) {
-                        foreach(var item in log) {
-                            sb.Append(item.Name + " " + item.Log + " " + item.Time.ToString("yyyy-MM-dd HH:mmss")+ " \n\n");
+                        foreach (var item in log) {
+                            sb.Append(item.Name + " " + item.Log + " " + item.Time.ToString("yyyy-MM-dd HH:mmss") + " \n\n");
                         }
                     }
                     await context.PostAsync(sb.ToString());
                 }
-                dao.Insert(Contact.Name, activity.Text, DateTime.UtcNow.AddHours(8).ToString("yyyy-MM-dd HH:mm:ss"));
-                if (activity.Text.Contains("123"))
-                {
+
+
+                if (activity.Text.ToUpper().Contains("新增")) {
+                    string[] sql = activity.Text.Split(';');
+
+                    dao.InsertQuotations(sql[1], sql[2]);
+                    StringBuilder sb = new StringBuilder();
+                    await context.PostAsync("Execute success");
+
+
+                }
+                if (activity.Text.Contains(";")) {
+                    string[] s = activity.Text.Split(';');
+                    string text = s[s.Length - 1];
+                    List<Quotation> log5 = dao.GetQuotations(text);
+                    StringBuilder sb5 = new StringBuilder();
+                    if (log5.Count > 0) {
+                        foreach (var item in log5) {
+                            sb5.Append(item.Value + " \n\n");
+                        }
+                        await context.PostAsync(sb5.ToString());
+                    }
+                }
+                               
+                
+
+
+
+                 dao.InsertMessageLog(Contact.Name, activity.Text, DateTime.UtcNow.AddHours(8).ToString("yyyy-MM-dd HH:mm:ss"));
+                if (activity.Text.Contains("123")) {
                     DateTime dayOff = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 18, 0, 0);
                     TimeSpan dd = dayOff.Subtract(DateTime.UtcNow.AddHours(8));
 
-                    if (Contact.Id.Equals("29:1-lHdGRIXVjWxaHlz25WYEmaIM963VpEyI_1gXQ_uz2U"))
-                    {
+                    if (Contact.Id.Equals("29:1-lHdGRIXVjWxaHlz25WYEmaIM963VpEyI_1gXQ_uz2U")) {
                         await context.PostAsync("倒數" + Math.Floor(dd.TotalMinutes) + "分鐘" + dd.Seconds + "秒,但是有潛規則,下班時間未知");
-                    }
-                    else
-                    {
+                    } else {
                         await context.PostAsync("倒數" + Math.Floor(dd.TotalMinutes) + "分鐘" + dd.Seconds + "秒");
                     }
                     //  CountDown.timer.Start();
 
 
                     // await context.PostAsync("http://imgur.com/cVNPngl");
-                }else if(activity.Text.Contains("峰哥副理")){
-                    await context.PostAsync("估一下，要完成店長排班你還需要幾個工作天.如果下週一，二加班寫的完嗎？");
-                }
-                else if(activity.Text.Contains("101")){
+                } else if (activity.Text.Contains("峰哥副理")) {
+                    List<Quotation> log = dao.GetQuotations("峰哥副理");
+                    StringBuilder sb = new StringBuilder();
+                    if (log.Count > 0) {
+                        foreach (var item in log) {
+                            sb.Append(item.Value + " \n\n");
+                        }
+                    }
+                    await context.PostAsync(sb.ToString());
+                } else if (activity.Text.Contains("101")) {
                     /*
                      *   ┃┃┃
      ┃┃┃
@@ -150,52 +174,39 @@ namespace Bot_Application1.Dialogs
 
 
 
-                } else if (activity.Text.Contains("456"))
-                {
+                } else if (activity.Text.Contains("456")) {
                     DateTime breakOff = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 12, 0, 0);
                     TimeSpan dd = breakOff.Subtract(DateTime.UtcNow.AddHours(8));
                     DateTime breakOff2 = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 12, 30, 0);
                     TimeSpan dd2 = breakOff2.Subtract(DateTime.UtcNow.AddHours(8));
                     //  CountDown.timer.Start();
 
-                    if (Contact.Id.Equals("29:1zzRM1BUX5XWVA7Ral9vpEeTa-DCYhRGE4aCyOzYgpHo"))
-                    {
+                    if (Contact.Id.Equals("29:1zzRM1BUX5XWVA7Ral9vpEeTa-DCYhRGE4aCyOzYgpHo")) {
                         await context.PostAsync("倒數" + Math.Floor(dd2.TotalMinutes) + "分鐘" + dd2.Seconds + "秒 吃飯");
-                    }
-                    else
-                    {
+                    } else {
                         await context.PostAsync("倒數" + Math.Floor(dd.TotalMinutes) + "分鐘" + dd.Seconds + "秒 吃飯");
                     }
 
 
-                }else if(activity.Text.Contains("遲到")){
+                } else if (activity.Text.Contains("遲到")) {
                     string s = "我還是希望我們資訊部同仁應該潔身自愛，管理好自己，我不喜歡管人，如果做不到，那就考慮是否適合留在資訊部，" +
                     "我不會浪費時間在需要監督的人身上，也不會和無法管理好自己的人共事。以上 請配合 謝謝";
                     string p = "CLint";
                     await context.PostAsync(s);
                     //await context.PostAsync(p);
-                }
-                else if (activity.Text.Contains("離職賭盤"))
-                {
+                } else if (activity.Text.Contains("離職賭盤")) {
                     await context.PostAsync("志峰:會1.9 不會1.1");
-                }
-                else if (activity.Text.Contains("我的下注"))
-                {
+                } else if (activity.Text.Contains("我的下注")) {
 
                     // string s = Contact.GetAppSetting(Contact.Id);
                     await context.PostAsync(Contact.Bet[Contact.Id]);
-                }
-                else if (activity.Text.Contains("@peterbot 下注"))
-                {
+                } else if (activity.Text.Contains("@peterbot 下注")) {
                     char[] se = { ' ' };
                     string[] s = activity.Text.Split(se);
                     // Contact.SetAppSetting(Contact.Id, s[2]);
                     Contact.Bet[Contact.Id] = s[2];
                     await context.PostAsync("下注 " + s[2] + " 成功");
-                }
-
-                else if (activity.Text.Contains("勞保級距"))
-                {
+                } else if (activity.Text.Contains("勞保級距")) {
                     HttpClient client = new HttpClient();
                     string x = "http://apiservice.mol.gov.tw/OdService/download/A17000000J-020014-gGq";
                     HttpResponseMessage m = client.GetAsync(x).Result;
@@ -205,18 +216,14 @@ namespace Bot_Application1.Dialogs
 
                     //  Console.WriteLine($"{value.FIELDS.colum_1,-15} {value.FIELDS.colum_2.PadRight(15)} {value.FIELDS.colum_3.PadRight(15)} {value.FIELDS.colum_4.PadRight(15)}");
                     await context.PostAsync($"{value.FIELDS.colum_1,-15} {value.FIELDS.colum_2.PadRight(15)} {value.FIELDS.colum_3.PadRight(15)} {value.FIELDS.colum_4.PadRight(15)}");
-                    foreach (molgovtwDATA data in value.DATA)
-                    {
+                    foreach (molgovtwDATA data in value.DATA) {
                         // Console.WriteLine($"{names[i],-8} {ages[i]}");
                         //Console.WriteLine($"{data.colum_1.PadRight(15)} {data.colum_2.PadRight(15)}  {data.colum_3.PadRight(20)}  {data.colum_4.PadRight(15)}");
-                        if (data.colum_1.Equals("一般勞工") && data.colum_1 != "")
-                        {
+                        if (data.colum_1.Equals("一般勞工") && data.colum_1 != "") {
                             await context.PostAsync($"{data.colum_1.PadRight(15)} {data.colum_2.PadRight(15)}  {data.colum_3.PadRight(20)}  {data.colum_4.PadRight(15)}");
                         }
                     }
-                }
-                else if (activity.Text.Contains("勞健保分攤表"))
-                {
+                } else if (activity.Text.Contains("勞健保分攤表")) {
                     HttpClient client = new HttpClient();
                     string x = "http://apiservice.mol.gov.tw/OdService/download/A17000000J-020015-ipY";
                     HttpResponseMessage m = client.GetAsync(x).Result;
@@ -226,17 +233,14 @@ namespace Bot_Application1.Dialogs
 
                     // Console.WriteLine(value.FIELDS.colum_1 + " " + value.FIELDS.colum_2 + " " + value.FIELDS.colum_3 + " " + value.FIELDS.colum_4 + " " + value.FIELDS.colum_5 + " " + value.FIELDS.colum_6);
                     await context.PostAsync($"{value.FIELDS.colum_1,-8}{value.FIELDS.colum_2.PadLeft(8)} {value.FIELDS.colum_3.PadLeft(8)}{value.FIELDS.colum_4.PadLeft(10)}{ value.FIELDS.colum_5.PadLeft(10) } {value.FIELDS.colum_6.PadLeft(10)}");
-                    foreach (ConsoleApp22.molgovtwDATA data in value.DATA)
-                    {
+                    foreach (ConsoleApp22.molgovtwDATA data in value.DATA) {
                         // Console.WriteLine($"{names[i],-8} {ages[i]}");
 
                         // Console.WriteLine(data.colum_1 + "       " + data.colum_2 + "       " + data.colum_3 + "     " + data.colum_4 + "        " + data.colum_5 + "           " + data.colum_6);
                         await context.PostAsync($"{data.colum_1.ToString(),-8 }{data.colum_2.ToString().PadLeft(10)}{data.colum_3.PadLeft(12)}{data.colum_4.ToString().PadLeft(16)}{data.colum_5.ToString().PadLeft(15)}{data.colum_6.ToString().PadLeft(15)}");
 
                     }
-                }
-                else if (activity.Text.Equals("@peterbot 天氣"))
-                {
+                } else if (activity.Text.Equals("@peterbot 天氣")) {
                     HttpClient client = new HttpClient();
 
                     string x2 = "http://opendata.cwb.gov.tw/opendata/MFC/F-C0044-001.FW01";
@@ -293,12 +297,11 @@ namespace Bot_Application1.Dialogs
 
                     //}
                 }
-                //else if (activity.Text.Contains("華華貓"))
-                //{
-                //    await context.PostAsync("廷廷貓");
-                //}
-                else if (activity.Text.Contains("洗版"))
-                {
+                  //else if (activity.Text.Contains("華華貓"))
+                  //{
+                  //    await context.PostAsync("廷廷貓");
+                  //}
+                  else if (activity.Text.Contains("洗版")) {
                     string s1 = "善現啟請分第二時 長老須菩提在大眾中，即從座起，偏袒右肩，右膝著地，合掌恭敬。而白佛言：「希有！世尊。如來善護念諸菩薩，善付囑諸菩薩。世尊！善男子、善女人，發阿耨 多羅三藐三菩提心，云何應住？云何降伏其心？」佛言：「善哉！善哉！須菩提！如汝所說，如來善護念諸菩薩，善付囑諸菩薩。汝今諦聽，當為汝說。善男子、善 女人，發阿耨多羅三藐三菩提心，應如是住，如是降伏其心。」「唯然！世尊！願樂欲聞。」";
                     string s2 = "大乘正宗分第三佛 告須菩提：「諸菩薩摩訶薩，應如是降伏其心：所有一切眾生之類─若卵生、若胎生、若濕生、若化生；若有色、若無色；若有想、若無想；若非有想非無想，我皆 令入無餘涅槃而滅度之。如是滅度無量無數無邊眾生，實無眾生得滅度者。何以故？須菩提！若菩薩有我相、人相、眾生相、壽者相，即非菩薩。」";
                     string s3 = "妙行無住分第四復 次：「須菩提！菩薩於法，應無所住，行於布施。所謂不住色布施，不住聲、香、味、觸、法布施。須菩提！菩薩應如是布施，不住於相。何以故？若菩薩不住相布 施，其福德不可思量。須菩提！於意云何？東方虛空可思量不？」「不也，世尊！」「須菩提！南、西、北方、四維、上、下虛空，可思量不？」「不也。世尊！」 「須菩提！菩薩無住相布施，福德亦復如是，不可思量。須菩提！菩薩但應如所教住！」";
@@ -308,18 +311,12 @@ namespace Bot_Application1.Dialogs
                     string s7 = "依法出生分第八「須菩提！於意云何？若人滿三千大千世界七寶，以用布施。是人所得福德，寧為多不？須菩提言：「甚多。世尊！何以故？是福德，即非福德性。是故如來說福德多。」「若復有人，於此經中，受持乃至四句偈等，為他人說，其福勝彼。何以故？須菩提！一切諸佛，及諸佛阿耨多羅三藐三菩提法，皆從此經出。須菩提！所謂佛法者，即非佛法。」";
                     string s8 = "一相無相分第九「須 菩提！於意云何？須陀洹能作是念，我得須陀洹果不？」須菩提言：「不也。世尊！何以故？須陀洹名為入流，而無所入；不入色、聲、香、味、觸、法。是名須陀 洹。」「須菩提！於意云何？斯陀含能作是念，我得斯陀含果不？」須菩提言：「不也。世尊！何以故？斯陀含名一往來，而實無往來，是名斯陀含。」「須菩提， 於意云何？阿那含能作是念，我得阿那含果不？」須菩提言：「不也。世尊！何以故？阿那含名為不來，而實無不來，是故名阿那含。」「須菩提！於意云何？阿羅 漢能作是念，我得阿羅漢道不？」須菩提言：「不也。世尊！何以故？實無有法名阿羅漢。世尊！若阿羅漢作是念，我得阿羅漢道，即為著我、人、眾生、壽者。世 尊！佛說我得無諍三昧，人中最為第一，是第一離欲阿羅漢。世尊！我不作是念：『我是離欲阿羅漢。』世尊！我若作是念，我得阿羅漢道，世尊則不說須菩提是樂 阿蘭那行者，以須菩提實無所行，而名須菩提，是樂阿蘭那行。」";
                     await context.PostAsync(s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8);
-                }
-                else if (activity.Text.Contains("颱風"))
-                {
+                } else if (activity.Text.Contains("颱風")) {
                     await context.PostAsync("http://www.cwb.gov.tw/V7/prevent/typhoon/ty.htm");
                     await context.PostAsync("https://www.dgpa.gov.tw/typh/typh/nds.html");
-                }
-                else if (activity.Text.ToUpper().Contains("BANG"))
-                {
+                } else if (activity.Text.ToUpper().Contains("BANG")) {
                     await context.PostAsync("https://ebcnews.s3.amazonaws.com/images/2017/05/25/14957248034094jJyk.jpg");
-                }
-                else if (activity.Text.Contains("冷清"))
-                {
+                } else if (activity.Text.Contains("冷清")) {
 
 
                     await context.PostAsync("慘,沒人");
@@ -366,160 +363,101 @@ namespace Bot_Application1.Dialogs
                     // });
 
 
-                }
-                else if (activity.Text.ToUpper().Contains("UML"))
-                {
+                } else if (activity.Text.ToUpper().Contains("UML")) {
                     await context.PostAsync("統一塑模語言（英語：Unified Modeling Language，縮寫UML）是非專利的第三代塑模和規約語言。 UML是一種開放的方法，用於說明、可視化、構建和編寫一個正在開發的、物件導向的、軟體密集系統的製品的開放方法。");
-                }
-                else if (activity.Text.Contains("小雨"))
-                {
+                } else if (activity.Text.Contains("小雨")) {
                     await context.PostAsync("志峰:人生污點");
                     await context.PostAsync("http://imgur.com/JRbYdys");
-                }
-                else if (activity.Text.Contains("辭") || activity.Text.Contains("慈"))
-                {
+                } else if (activity.Text.Contains("辭") || activity.Text.Contains("慈")) {
                     await context.PostAsync("http://imgur.com/l7EXpB5");
-                }
-                else if (activity.Text.Contains("很濕"))
-                {
+                } else if (activity.Text.Contains("很濕")) {
                     await context.PostAsync("http://imgur.com/vOVqKAW");
 
-                }
-                else if (activity.Text.Contains("超爽的") || activity.Text.Contains("超爽der") || activity.Text.Contains("爽"))
-                {
+                } else if (activity.Text.Contains("超爽的") || activity.Text.Contains("超爽der") || activity.Text.Contains("爽")) {
                     await context.PostAsync("http://imgur.com/AG5BmjH");
 
-                }
-                else if (activity.Text.Contains("舞獅情") || activity.Text.Contains("伍詩晴"))
-                {
+                } else if (activity.Text.Contains("舞獅情") || activity.Text.Contains("伍詩晴")) {
                     await context.PostAsync("http://imgur.com/Ay9JbPr");
 
-                }
-                else if (activity.Text.Contains("麵"))
-                {
+                } else if (activity.Text.Contains("麵")) {
                     await context.PostAsync("資訊部 祥凱#624:不吃麵");
-                }
-                else if (activity.Text.Contains("比基尼被逮"))
-                {
+                } else if (activity.Text.Contains("比基尼被逮")) {
                     await context.PostAsync("https://imgur.com/HLzLarM");
-                }
-                else if (activity.Text.Contains("平偉"))
-                {
+                } else if (activity.Text.Contains("平偉")) {
                     await context.PostAsync("https://imgur.com/Xh4F6ry");
-                }
-                else if (activity.Text.Contains("廟口"))
-                {
+                } else if (activity.Text.Contains("廟口")) {
                     await context.PostAsync("http://imgur.com/AQduRBE");
-                }
-                else if (activity.Text.Contains("熱量"))
-                {
+                } else if (activity.Text.Contains("熱量")) {
                     await context.PostAsync("http://i.imgur.com/ey6tvcJ.jpg");
-                }
-                else if (activity.Text.Contains("學弟"))
-                {
+                } else if (activity.Text.Contains("學弟")) {
                     await context.PostAsync("晚點到");
 
                 } else if (activity.Text.Contains("對話紀錄")) {
 
-                    foreach(string s in Contact.history){
+                    foreach (string s in Contact.history) {
                         await context.PostAsync(s);
                     }
-                 
 
-                } else if (activity.Text.ToUpper().Contains("YO"))
-                {
+
+                } else if (activity.Text.ToUpper().Contains("YO")) {
                     await context.PostAsync("http://imgur.com/ygivezG");
 
-                }
-             
-                else if (activity.Text.Contains("開盤倒數"))
-                {
-                    if (Contact.Id.Equals("29:1QDNQ50dEqCIGfRNmO3VE-4QmxhkqVjkjqBa-PKWvfdY"))
-                    {
+                } else if (activity.Text.Contains("開盤倒數")) {
+                    if (Contact.Id.Equals("29:1QDNQ50dEqCIGfRNmO3VE-4QmxhkqVjkjqBa-PKWvfdY")) {
                         DateTime time2 = new DateTime(2017, 09, 01, 8, 30, 0);
                         DateTime now2 = DateTime.UtcNow.AddHours(8);
                         TimeSpan t2 = time2.Subtract(now2);
                         await context.PostAsync("辭職倒數 " + t2.ToString());
-                    }
-                    else
-                    {
+                    } else {
                         DateTime time = new DateTime(2017, 08, 04, 11, 00, 0);
                         DateTime now = DateTime.UtcNow.AddHours(8);
                         TimeSpan t = time.Subtract(now);
-                        await context.PostAsync("都過了"+Math.Abs(Math.Floor(t.TotalDays))+ "天了,盧志峰還不辭");
+                        await context.PostAsync("都過了" + Math.Abs(Math.Floor(t.TotalDays)) + "天了,盧志峰還不辭");
                     }
-                }
-                else if (activity.Text.Contains("峰哥獎金"))
-                {
+                } else if (activity.Text.Contains("峰哥獎金")) {
                     await context.PostAsync("2017年7月 1萬2");
 
-                }
-                else if (activity.Text.Contains("小雞"))
-                {
+                } else if (activity.Text.Contains("小雞")) {
                     await context.PostAsync("http://imgur.com/gvOPrWQ");
 
-                }
-                else if (activity.Text.Contains("鬍鬚張"))
-                {
-                    if (Contact.Id.Equals("29:1QDNQ50dEqCIGfRNmO3VE-4QmxhkqVjkjqBa-PKWvfdY"))
-                    {
+                } else if (activity.Text.Contains("鬍鬚張")) {
+                    if (Contact.Id.Equals("29:1QDNQ50dEqCIGfRNmO3VE-4QmxhkqVjkjqBa-PKWvfdY")) {
                         await context.PostAsync("出來辦個事情還被call 而且明明就是客戶的問題 還在番 還聽不懂我在講什麼");
-                    }
-                    else
-                    {
+                    } else {
                         await context.PostAsync("http://imgur.com/PFc9fvB");
                     }
- 
 
-                }
-                else if (activity.Text.Contains("峰哥組長"))
-                {
+
+                } else if (activity.Text.Contains("峰哥組長")) {
                     await context.PostAsync("我領導加給只有2000");
 
-                }
-                else if (activity.Text.Contains("立委") || activity.Text.Contains("力瑋"))
-                {
+                } else if (activity.Text.Contains("立委") || activity.Text.Contains("力瑋")) {
                     await context.PostAsync("http://imgur.com/MpXUPTJ");
-                }
-                else if (activity.Text.Contains("小胖"))
-                {
+                } else if (activity.Text.Contains("小胖")) {
                     await context.PostAsync("http://imgur.com/qDbDUx1");
                 }
-                //else if (activity.Text.Contains("子寧"))
-                //{
-                //    await context.PostAsync("http://imgur.com/8PEWm1i");
-                //}
-                else if (activity.Text.Contains("西歐") || activity.Text.ToUpper().Contains("CO"))
-                {
+                  //else if (activity.Text.Contains("子寧"))
+                  //{
+                  //    await context.PostAsync("http://imgur.com/8PEWm1i");
+                  //}
+                  else if (activity.Text.Contains("西歐") || activity.Text.ToUpper().Contains("CO")) {
                     await context.PostAsync("http://imgur.com/oD2au4w");
-                }
-                else if (activity.Text.Contains("董事長兒子"))
-                {
+                } else if (activity.Text.Contains("董事長兒子")) {
                     await context.PostAsync("riolove chang");
-                }
-                else if (activity.Text.Contains("文B"))
-                {
+                } else if (activity.Text.Contains("文B")) {
                     await context.PostAsync("http://imgur.com/5LExAMa");
-                }
-                else if (activity.Text.Contains("起床"))
-                {
+                } else if (activity.Text.Contains("起床")) {
                     await context.PostAsync("現在時間么三三洞，部隊起床");
-                }
-                else if (activity.Text.Contains("賭盤"))
-                {
+                } else if (activity.Text.Contains("賭盤")) {
                     await context.PostAsync("志峰:0~499  1.7 \n 500~1999 1.3 \n 2000~3999 1.5 \n 4000 up 1.9");
                     await context.PostAsync("1550");
-                }
-                else if (activity.Text.Contains("風歌") || activity.Text.Contains("志峰") || activity.Text.Contains("峰"))
-                {
+                } else if (activity.Text.Contains("風歌") || activity.Text.Contains("志峰") || activity.Text.Contains("峰")) {
                     //await context.PostAsync("http://imgur.com/CF3oN5i");
                     //await context.PostAsync("http://imgur.com/1kke4ds");
                     await context.PostAsync("在逛104 別吵");
                 }//股票
-                else if (int.TryParse(activity.Text.Remove(0, 10), out n))
-                {
-                    if (activity.Text.Remove(0, 10).Count() == 4)
-                    {
+                  else if (int.TryParse(activity.Text.Remove(0, 10), out n)) {
+                    if (activity.Text.Remove(0, 10).Count() == 4) {
                         WebClient client = new WebClient();
                         client.Encoding = Encoding.GetEncoding("Big5");
                         string s = "http://tw.stock.yahoo.com/q/q?s=";
@@ -542,8 +480,7 @@ namespace Bot_Application1.Dialogs
                     "./tr[2]").InnerText.Trim().Split('\n');
                         int i = 0;
                         // 輸出資料 
-                        foreach (HtmlNode nodeHeader in nodeHeaders)
-                        {
+                        foreach (HtmlNode nodeHeader in nodeHeaders) {
                             //Console.WriteLine("Header: {0}, Value: {1}",nodeHeader.InnerText, values[i].Trim());
                             await context.PostAsync(nodeHeader.InnerText + " " + values[i].Trim());
                             i++;
@@ -553,14 +490,12 @@ namespace Bot_Application1.Dialogs
                         client = null;
                         ms.Close();
                     }
-                }
-                else
-                {
+                } else {
                     // calculate something for us to return
                     //int length = (activity.Text ?? string.Empty).Length;
                     //// return our reply to the user
                     //await context.PostAsync($"You sent {activity.Text} which was {length} characters");
-                   // await context.PostAsync($"You sent {activity.Text}");
+                    // await context.PostAsync($"You sent {activity.Text}");
                     //int i = new Random().Next(0, 5);
                     //int i2 = new Random().Next(0, 5);
                     //List<string> s = new List<string>();
@@ -602,9 +537,7 @@ namespace Bot_Application1.Dialogs
 
 
                 context.Wait(MessageReceivedAsync);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 await context.PostAsync("幹你娘,指令別亂打");
                 await context.PostAsync(ex.Message);
             }
@@ -613,14 +546,12 @@ namespace Bot_Application1.Dialogs
 
     }
     // public delegate void ControlHandler(bool show);
-    public class Contact
-    {
+    public class Contact {
         public static List<string> history = new List<string>();
         public static string Id;
         public static string Name;
         public static Dictionary<string, string> Bet = new Dictionary<string, string>();
-        public static void SetAppSetting(string key, string value)
-        {
+        public static void SetAppSetting(string key, string value) {
             //Configuration config = ConfigurationManager.OpenExeConfiguration(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
             //if (config.AppSettings.Settings != null)
@@ -633,24 +564,18 @@ namespace Bot_Application1.Dialogs
 
             Configuration rootWebConfig1 = System.Web.Configuration.WebConfigurationManager.OpenWebConfiguration(null);
 
-            if(rootWebConfig1.AppSettings.Settings!=null)
-            {
+            if (rootWebConfig1.AppSettings.Settings != null) {
                 rootWebConfig1.AppSettings.Settings.Remove(key);
             }
             rootWebConfig1.AppSettings.Settings.Add(key, value);
-          //  rootWebConfig1.AppSettings.Settings[key].Value = value;
+            //  rootWebConfig1.AppSettings.Settings[key].Value = value;
             rootWebConfig1.Save();
         }
 
-        public static string GetAppSetting(string key)
-        {
-            try
-            {
+        public static string GetAppSetting(string key) {
+            try {
                 return ConfigurationManager.AppSettings[key];
-            }
-
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 throw ex;
             }
         }
