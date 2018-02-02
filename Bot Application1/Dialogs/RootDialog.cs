@@ -162,8 +162,8 @@ namespace Bot_Application1.Dialogs {
                 dao.InsertMessageLog(Contact.Name, activity.Text, DateTime.UtcNow.AddHours(8).ToString("yyyy-MM-dd HH:mm:ss"));
                 context.Wait(MessageReceivedAsync);
             } catch (Exception ex) {
-                await context.PostAsync("幹你娘,指令別亂打");
-                await context.PostAsync(ex.Message);
+             //   await context.PostAsync("https://imgur.com/a/dfzNA");
+             //   await context.PostAsync(ex.Message);
             }
 
         }
